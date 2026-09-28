@@ -90,23 +90,13 @@ body>canvas{position:fixed;inset:0;z-index:0}#panel{background:#0c201ef5;border-
   <label for="mproom" style="font-size:12px;font-weight:700">Room ID</label>
   <input id="mproom" placeholder="e.g. room1" style="width:100%;margin:4px 0 12px;padding:8px;border-radius:8px;border:1px solid #ccd;font:inherit">
   <div class="btn" id="mpconnect" style="width:100%;text-align:center;background:#33c3ff">CONNECT & JOIN</div>
-  <div style="display:flex;align-items:center;gap:7px;margin-top:11px">
-   <span id="mpdot" style="width:9px;height:9px;border-radius:50%;background:#ccc;flex:0 0 auto;transition:background .2s"></span>
-   <span id="mpstatus" style="font-size:12px;min-height:16px;color:#667">Not connected</span>
-  </div>
-  <div id="mplist" style="margin:8px 0;font-size:12px;max-height:100px;overflow:auto;line-height:1.8"></div>
-  <div class="btn" id="mpstart" style="width:100%;text-align:center;margin-top:6px;background:#a6f0b8;display:none">START GAME</div>
-  <div id="mpleave" style="text-align:center;margin-top:10px;font-size:12px;text-decoration:underline;cursor:pointer;color:#c0546e;display:none">leave room</div>
-  <div id="mpback" style="text-align:center;margin-top:6px;font-size:12px;text-decoration:underline;cursor:pointer;color:#888">back</div>
+  <div id="mpstatus" style="margin-top:10px;font-size:12px;min-height:18px;color:#666"></div>
+  <div id="mplist" style="margin:6px 0;font-size:12px;max-height:90px;overflow:auto"></div>
+  <div class="btn" id="mpstart" style="width:100%;text-align:center;margin-top:8px;background:#a6f0b8;display:none">START GAME</div>
+  <div id="mpback" style="text-align:center;margin-top:10px;font-size:12px;text-decoration:underline;cursor:pointer;color:#888">back</div>
  </div>
 </div>
-<div id="hunterwait" class="hidden" style="position:absolute;inset:0;z-index:28;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0b0b0f;color:#fff;text-align:center">
- <div style="font-size:46px;margin-bottom:6px">&#128584;</div>
- <div style="font-size:22px;font-weight:800;letter-spacing:1px">HIDERS ARE HIDING...</div>
- <div style="opacity:.6;margin:6px 0 18px;font-size:13px">You can't see the map until the seek phase begins</div>
- <div id="hwcount" style="font-size:40px;font-weight:900;color:#ff9f9f"></div>
-</div>
-<div id="rolebanner" class="hidden pill" style="top:16px;left:50%;transform:translateX(-50%);z-index:22;font-weight:800;transition:background .3s"></div>
+<div id="rolebanner" class="hidden pill" style="top:16px;left:50%;transform:translateX(-50%);z-index:22;font-weight:800"></div>
 <div id="endscreen" class="hidden" style="position:absolute;inset:0;z-index:45;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.75)">
  <div style="background:#fff;color:#223;border-radius:20px;padding:26px 34px;text-align:center;box-shadow:0 6px 0 rgba(0,0,0,.3)">
   <h2 id="endtitle" style="margin:0 0 10px">ROUND OVER</h2>
@@ -170,8 +160,7 @@ const T={
  paper:(a,b)=>ctex(128,128,g=>{g.fillStyle=a;g.fillRect(0,0,128,128);g.fillStyle=b;for(let i=0;i<128;i+=16)g.fillRect(i,0,8,128);rn(g,150,['rgba(0,0,0,.06)'],128,3);}),
  brick:(hsl,m)=>ctex(256,128,g=>{g.fillStyle=m;g.fillRect(0,0,256,128);for(let r=0;r<8;r++)for(let c=-1;c<4;c++){g.fillStyle=`hsl(${hsl[0]+Math.random()*8},${hsl[1]}%,${hsl[2]+Math.random()*9}%)`;g.fillRect(c*64+(r%2)*32+2,r*16+2,60,12);}}),
  carpet:()=>ctex(128,128,g=>{g.fillStyle='#b9a45a';g.fillRect(0,0,128,128);rn(g,1600,['#a8934a','#c9b56a']);}),
- tile:()=>ctex(128,128,g=>{g.fillStyle='#4d5a52';g.fillRect(0,0,128,128);g.fillStyle='#5f6d63';g.fillRect(3,3,58,58);g.fillRect(67,67,58,58);g.fillStyle='#56645b';g.fillRect(67,3,58,58);g.fillRect(3,67,58,58);rn(g,200,['rgba(0,0,0,.15)']);}),
- checker:()=>ctex(128,128,g=>{g.fillStyle='#e8e8e8';g.fillRect(0,0,128,128);g.fillStyle='#26282c';g.fillRect(0,0,64,64);g.fillRect(64,64,64,64);rn(g,120,['rgba(0,0,0,.08)']);})
+ tile:()=>ctex(128,128,g=>{g.fillStyle='#4d5a52';g.fillRect(0,0,128,128);g.fillStyle='#5f6d63';g.fillRect(3,3,58,58);g.fillRect(67,67,58,58);g.fillStyle='#56645b';g.fillRect(67,3,58,58);g.fillRect(3,67,58,58);rn(g,200,['rgba(0,0,0,.15)']);})
 };
 const wc={};const wallTex=c=>wc[c]||(wc[c]=T.paper('#'+new THREE.Color(c).getHexString(),'#'+new THREE.Color(c).multiplyScalar(.92).getHexString()));
 const M=c=>c&&c.isTexture?new THREE.MeshStandardMaterial({map:c,roughness:.9}):new THREE.MeshStandardMaterial({color:c,roughness:.8});
@@ -194,66 +183,37 @@ function lamp(x,z){cyl(.05,.05,3.5,0x333333,x,0,z,{col:true});cyl(.3,.7,.8,0xffe
 const pal=i=>[0xff5733,0x33c3ff,0xffd93d,0x6bcb77,0xff6bd6,0xa66cff,0xff9f43][i%7];
 
 // ================= Maps (inspired by the official Mansion, Backrooms and Sewer; layouts are approximations) =================
-function statue(x,z,c=0xf5f0e6){cyl(.75,.85,.3,0xcdbfa0,x,0,z,{col:true});box(.5,1.7,.42,c,x,.3,z,{ry:.15});
- box(.34,.95,.3,c,x-.08,1.75,z-.2,{ry:-.5});sph(.27,c,x,2.15,z-.05);}
-function balloons(x,z,cs){let y=.9;cs.forEach(c=>{sph(.32,c,x,y,z);y+=.6;});}
 function mansion(){
  const H=R+.25;
  wall(-R,H,R,H,0xe6cfa0);
- wall(-15,-R,-15,-9,0xcfe3f5);wall(-15,9,-15,R,0xcfe3f5);wall(15,-R,15,-9,0xf5d7f0);wall(15,9,15,R,0xf5d7f0);wall(-R,15,-27,15,0xcfe3f5);wall(27,-15,R,-15,0xf5d7f0);
- for(let i=-4;i<=4;i++)if(i)box(4,2.6,.2,0x9fdcff,i*9,2,-R+.4);
- [0xe94f4f,0x4f8ee9,0x59c26a,0xf1c40f,0xff6bd6,0x9b59b6].forEach((c,i)=>{box(1.9,1.4,.1,0x553311,-24+i*10,3,H-.4);box(1.6,1.1,.12,c,-24+i*10,3.15,H-.45);});
- // grand hall (centre) - a big party floor like the reference: rings, streamers, statues, a staircase backdrop, round tables
- cyl(8,8,.04,0xc0392b,0,0,-24);cyl(6.4,6.4,.06,0xf1c40f,0,0,-24);cyl(4.8,4.8,.08,0x2980b9,0,0,-24);
- for(let k=0;k<10;k++){const a=k/10*Math.PI*2;box(.35,4+rnd()*2,.35,[0xe74c3c,0x3498db,0xf1c40f,0x2ecc71,0x9b59b6][k%5],Math.sin(a)*13,2,-24+Math.cos(a)*13,{ry:a});}
- box(9,.4,7,0x6b3e15,0,.2,-38,{col:[4.5,3.5]});for(let s=0;s<6;s++)box(9-s*.5,.4,.9,0x7a4a20,0,.4+s*.4,-38+3-s*.9);         // staircase backdrop
- statue(-4.5,-33);statue(4.5,-33);
- sofa(0,-27);table(0,-20,3,2);sofa(-8,-19,0x00b894);lamp(-10,-27);lamp(10,-27);plant(7,-25);plant(-7,-25);
- table(-9,-11,3.2,2.2);[[-1.4,-1.6],[1.4,-1.6],[-1.4,1.6],[1.4,1.6]].forEach(([a,b])=>chair(-9+a,-11+b));
- table(9,-11,3.2,2.2);[[-1.4,-1.6],[1.4,-1.6],[-1.4,1.6],[1.4,1.6]].forEach(([a,b])=>chair(9+a,-11+b));
- balloons(-11,-16,[0xff6bd6,0xffd93d,0x33c3ff]);balloons(11,-16,[0x6bcb77,0xff9f43,0xa66cff]);balloons(-6,-30,[0xff5733,0x33c3ff]);balloons(6,-30,[0xffd93d,0x6bcb77]);
- cyl(7,7,.04,0x16a085,0,0,28);cyl(5.5,5.5,.06,0xe67e22,0,0,28);
- for(let r=0;r<4;r++)for(let c=0;c<4-r;c++)box(1.3,1.3,1.3,[0xff5733,0x33c3ff,0xffd93d,0x6bcb77][(r+c)%4],-2.6+c*1.4+r*.7,r*1.3,28);
- cols.push({x:0,z:28,hw:3,hd:.8});
- [[-7,5],[7,5],[-7,-5],[7,-5]].forEach(([x,z])=>cyl(1.1,1.1,6.5,0xdfc7a0,x,0,z,{col:true}));   // pillars (ceiling-hang spots)
- box(5,.35,1.2,0x8e44ad,0,1,16,{col:[2.5,.6]});
- // kitchen + dining (west wing)
- box(1.8,1.4,26,0xecf0f1,-42,0,-12,{col:true});box(2,.18,26,0x34495e,-42,1.4,-12);box(1.8,1.4,13,0xecf0f1,-42,0,25,{col:true});box(2,.18,13,0x34495e,-42,1.4,25);
- for(let i=0;i<10;i++)cyl(.28+rnd()*.16,.32,.45+rnd()*.4,pal(i),-42,1.55,-24+i*2.7);
- table(-30,-10,5.6,3.4);[[-1.9,-2.6],[1.9,-2.6],[-1.9,2.6],[1.9,2.6]].forEach(([a,b])=>chair(-30+a,-10+b,0xe17055));
- // library (south-west)
- shelf(-33,-42);shelf(-25,-42);shelf(-40,-35,false);shelf(-40,33,false);shelf(-25,42);
- table(-27,26,3.4,2.2,0x6b3e15);chair(-27,28);sofa(-32,38,0xe17055);plant(-18,-40);plant(-42,6);lamp(-18,6);
- // bedroom + study (east wing)
- box(3.4,.7,5.4,0x8e44ad,35,0,28,{col:true});box(3,.4,4.6,0xecf0f1,35,.7,28.1);box(1.6,.28,.9,0xffffff,35,1.1,30.3);
- box(3.4,5,1.4,0x7a4a20,35,0,-40,{col:true});box(3.4,5,1.4,0x8a5a2b,29,0,-40,{col:true});
- table(26,-28,4.6,2.4);chair(26,-25,0x2980b9);sofa(23,38,0x0984e3);shelf(42,-5,false);shelf(42,5,false);shelf(42,15,false);plant(39,-11);plant(17,-40);lamp(40,20);
- for(let i=0;i<12;i++)sph(.38+rnd()*.42,pal(i),20+rnd()*12,0,-9+rnd()*9,{col:true});
- for(let i=0;i<220;i++){const x=(rnd()-.5)*(R*2-4),z=(rnd()-.5)*(R*2-4);if(Math.hypot(x,z)<3.5||(Math.abs(Math.abs(x)-15)<1.6&&Math.abs(z)>6.5))continue;
+ wall(-10,-R,-10,-6,0xcfe3f5);wall(-10,6,-10,R,0xcfe3f5);wall(10,-R,10,-6,0xf5d7f0);wall(10,6,10,R,0xf5d7f0);wall(-R,10,-18,10,0xcfe3f5);wall(18,-10,R,-10,0xf5d7f0);
+ for(let i=-3;i<=3;i++)if(i)box(4,2.4,.2,0x9fdcff,i*7.5,2,-R+.4);
+ [0xe94f4f,0x4f8ee9,0x59c26a,0xf1c40f].forEach((c,i)=>{box(1.8,1.3,.1,0x553311,-18+i*12,3,H-.4);box(1.5,1,.12,c,-18+i*12,3.15,H-.45);});
+ // hall (centre)
+ cyl(5,5,.04,0xc0392b,0,0,-18);cyl(4,4,.06,0xf1c40f,0,0,-18);cyl(3,3,.08,0x2980b9,0,0,-18);
+ sofa(0,-27);table(0,-20,3,2);sofa(-6,-19,0x00b894);lamp(-8,-27);lamp(8,-27);plant(6,-25);plant(-6,-25);
+ cyl(5,5,.04,0x16a085,0,0,20);cyl(3.5,3.5,.06,0xe67e22,0,0,20);
+ for(let r=0;r<4;r++)for(let c=0;c<4-r;c++)box(1.2,1.2,1.2,[0xff5733,0x33c3ff,0xffd93d,0x6bcb77][(r+c)%4],-2+c*1.25+r*.62,r*1.2,20);
+ cols.push({x:0,z:20,hw:2.6,hd:.7});
+ [[-5,4],[5,4],[-5,-4],[5,-4]].forEach(([x,z])=>cyl(1,1,6,0xdfc7a0,x,0,z,{col:true}));   // pillars (ceiling-hang spots)
+ box(4,.3,1,0x8e44ad,0,1,12,{col:[2,.5]});
+ // kitchen + dining
+ box(1.6,1.3,20,0xecf0f1,-29,0,-10,{col:true});box(1.8,.15,20,0x34495e,-29,1.3,-10);box(1.6,1.3,10,0xecf0f1,-29,0,18,{col:true});box(1.8,.15,10,0x34495e,-29,1.3,18);
+ for(let i=0;i<8;i++)cyl(.25+rnd()*.15,.3,.4+rnd()*.4,pal(i),-29,1.45,-18+i*2.4);
+ table(-20,-8,5,3);[[-1.6,-2.3],[1.6,-2.3],[-1.6,2.3],[1.6,2.3]].forEach(([a,b])=>chair(-20+a,-8+b,0xe17055));
+ // library
+ shelf(-22,-29);shelf(-15,-29);shelf(-27,-24,false);shelf(-27,22,false);shelf(-15,29);
+ table(-18,18,3,2,0x6b3e15);chair(-18,20);sofa(-22,26,0xe17055);plant(-12,-27);plant(-28,4);lamp(-12,4);
+ // bedroom + study
+ box(3,.6,4.6,0x8e44ad,24,0,20,{col:true});box(2.7,.35,4,0xecf0f1,24,.6,20.1);box(1.4,.25,.8,0xffffff,24,.95,21.8);
+ box(3,4.5,1.2,0x7a4a20,24,0,-28,{col:true});box(3,4.5,1.2,0x8a5a2b,20,0,-28,{col:true});
+ table(18,-20,4,2);chair(18,-18,0x2980b9);sofa(16,26,0x0984e3);shelf(29,-3,false);shelf(29,4,false);shelf(29,11,false);plant(27,-8);plant(12,-27);lamp(28,14);
+ for(let i=0;i<10;i++)sph(.35+rnd()*.4,pal(i),14+rnd()*8,0,-6+rnd()*6,{col:true});
+ for(let i=0;i<140;i++){const x=(rnd()-.5)*(R*2-4),z=(rnd()-.5)*(R*2-4);if(Math.hypot(x,z)<2.5||(Math.abs(Math.abs(x)-10)<1.4&&Math.abs(z)>4.5))continue;
   const c=pal(i),t=i%5;
   if(t===0)box(.7+rnd()*.6,.7+rnd()*.6,.7+rnd()*.6,c,x,0,z,{col:true,ry:rnd()*3});else if(t===1)sph(.35+rnd()*.35,c,x,0,z,{col:true});
   else if(t===2)cyl(.3,.3,.7+rnd()*.6,c,x,0,z,{col:true});else if(t===3)cone(.35,.9,c,x,0,z,{col:true});
   else{box(.9,.9,.9,0xc8965a,x,0,z,{col:true,ry:rnd()*3});box(.6,.6,.6,c,x,.9,z);}}
-}
-function laundry(){
- const H=R+.25;wall(-H,-H,H,-H,0xf2d6a8);wall(-H,H,H,H,0xf2d6a8);wall(-H,-H,-H,H,0xf2d6a8);wall(H,-H,H,H,0xf2d6a8);
- // washer/dryer row
- for(let i=0;i<6;i++){const x=-15+i*6;box(2.6,2.2,1.8,[0xd94f4f,0xd9b23a][i%2],x,0,-H+1.3,{col:true});cyl(.75,.75,.1,0x223,x,1.3,-H+2.25);cyl(.55,.55,.06,0x88bcd8,x,1.3,-H+2.3);}
- box(6,.4,1.6,0x8899a0,-15,2.4,-H+1.3);box(6,.4,1.6,0x8899a0,3,2.4,-H+1.3);
- for(let i=0;i<7;i++)box(.35+rnd()*.15,.45+rnd()*.15,.28,pal(i),-15+i*1.5,2.7,-H+2.1);
- // clothesline with hanging garments
- const cs=[0x6d8ff0,0x6bcb77,0xffd93d,0xff9f9f,0xdcdcdc,0xa66cff,0xff6bd6,0x33c3ff];
- for(let k=-1;k<=1;k++){const zL=k*7;for(let i=0;i<9;i++){const x=-16+i*4,h=.9+rnd()*.4;
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(.9,h),M(cs[(i+k+9)%8]));m.position.set(x,3-h/2,zL);m.rotation.y=(rnd()-.5)*.3;m.castShadow=true;mapG.add(m);}}
- // towel / linen stacks on tables
- [[-8,4],[0,4],[9,6],[16,2]].forEach(([x,z],idx)=>{box(2.4,1,1.6,0x6b3e15,x,.5,z,{col:true});
-  const layers=[0xffffff,0x4d6bff,0xffb84d,0xffffff,0x6bcb77];let y=1;
-  for(let l=0;l<layers.length;l++){box(2-rnd()*.3,.22,1.3-rnd()*.2,layers[(l+idx)%layers.length],x,y,z);y+=.24;}});
- // sink + buckets + detergent
- box(2.2,1.1,1,0x9aa5ab,17,1.1,-9,{col:true});cyl(.06,.06,.5,0x556,17.6,1.7,-9.3);
- cyl(.55,.4,.8,0x4d6bff,-19,0,4,{col:true});cyl(.5,.35,1.1,0xffffff,-19,0,7,{col:true});box(.4,.5,.3,0x33c3ff,-19,.55,7);
- cyl(.5,.35,1.1,0xffffff,17,0,10,{col:true});box(.4,.5,.3,0xff9f43,17,.55,10);
- for(let i=0;i<8;i++){const x=(rnd()-.5)*(R*2-6),z=(rnd()-.5)*(R*2-6);if(Math.abs(z)>H-3)continue;box(.4,.4,.4,pal(i),x,0,z,{col:true,ry:rnd()*3});}
 }
 function backrooms(){
  const C=7,n=8,o=-R,sk=(a,b)=>Math.hypot(a,b-3)<7;
@@ -278,10 +238,9 @@ function sewer(){
  for(let z=-24;z<=24;z+=12)[-1,1].forEach(s=>sph(.22,0xffe08a,s*13.6,4,z));
 }
 const MAPS={
- Mansion:{R:46,bg:0xffe9c9,fog:[32,95],hl:[0xfff4e0,0x8a6a4a,.8],sun:.9,floor:T.wood,fr:22,w:()=>0xf2d6a8,build:mansion},
+ Mansion:{R:30,bg:0xffe9c9,fog:[25,70],hl:[0xfff4e0,0x8a6a4a,.8],sun:.9,floor:T.wood,fr:16,w:()=>0xf2d6a8,build:mansion},
  Backrooms:{R:28,bg:0xcfbf6a,fog:[10,36],hl:[0xfff6b0,0x8a7a30,1],sun:.25,floor:T.carpet,fr:20,w:()=>0xd6c56a,build:backrooms},
- Sewer:{R:28,bg:0x18241f,fog:[8,42],hl:[0x9fd8c8,0x2a3a30,.75],sun:.35,floor:T.tile,fr:14,w:()=>T.brick([12,14,30],'#131b19'),build:sewer},
- Laundry:{R:24,bg:0xb85a4a,fog:[14,44],hl:[0xffe8d8,0x6a3a30,.85],sun:.7,floor:T.checker,fr:12,w:()=>0x8a3a3a,build:laundry}};
+ Sewer:{R:28,bg:0x18241f,fog:[8,42],hl:[0x9fd8c8,0x2a3a30,.75],sun:.35,floor:T.tile,fr:14,w:()=>T.brick([12,14,30],'#131b19'),build:sewer}};
 const MN=Object.keys(MAPS);let mapName='Mansion';
 function buildMap(name){
  mapName=name;const mp=MAPS[name];if(mapG){const textures=new Set(),materials=new Set();mapG.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>materials.add(m));});materials.forEach(m=>{if(m.map)textures.add(m.map);m.dispose();});textures.forEach(t=>{if(!Object.values(wc).includes(t))t.dispose();});scene.remove(mapG);}mapG=new THREE.Group();scene.add(mapG);walls=[];cols=[];seed=11;R=mp.R;
@@ -296,12 +255,7 @@ function buildMap(name){
  cham.position.set(0,0,3);$('mapname').textContent=name==='Mansion'?'Hide-and-Seek Mansion':name;
 }
 
-// ================= Humanoid: one shared UV-atlas paint canvas per character, so what a hider paints is pixel-identical for every viewer =================
-// Every body part's UVs are remapped at build time into its own private rectangle of ONE shared
-// 2D canvas texture - like the panels of an unfolded papercraft model. Painting is then just plain
-// 2D canvas drawing at the raycast hit's UV: no seams, no lighting math, and syncing across the
-// network is a tiny {u,v,radius,color} stroke command replayed identically on every client, so a
-// hunter sees exactly the camo you painted rather than an approximation of it.
+// ================= Humanoid: one body, paint lives in one shared 3D volume, drawn UNLIT (flat) so no seams =================
 const BASE='#f4f4f4',paintMeshes=[],wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
 const pv=(par,x=0,y=0,z=0)=>{const o=new THREE.Group();o.position.set(x,y,z);par.add(o);return o;};
 const VS=.02,VMIN=new THREE.Vector3(),volU={uArmorShade:{value:0},uVol:{value:null},uMin:{value:VMIN},uSize:{value:new THREE.Vector3()}};
@@ -350,8 +304,8 @@ const POSES={
  'Sit':P({0:-.5,1:.15,2:.9,3:-.5,4:.15,5:.9,6:-1.57,7:.08,8:1.57,9:-1.57,10:.08,11:1.57,12:-.32,18:.85}),
  'Curl-Up':P({0:-1.3,1:.3,2:1.8,3:-1.3,4:.3,5:1.8,6:-1.9,7:.25,8:2.3,9:-1.9,10:.25,11:2.3,12:-.42,13:.7,14:.5,18:.8,19:.9}),
  'Ball':P({0:-1.5,1:.4,2:2.2,3:-1.5,4:.4,5:2.2,6:-2.2,7:.3,8:2.6,9:-2.2,10:.3,11:2.6,12:-.5,13:.9,14:.8,18:.85,19:.85}),
- 'Lie Flat':P({1:.03,2:0,4:.03,5:0,7:.02,10:.02,12:-.65,14:-.3,16:-1.57,18:.16,19:1.05}),
- 'Wall Flat':P({1:.03,2:0,4:.03,5:0,7:.02,8:0,10:.02,11:0,18:.13,19:1.02}),
+ 'Lie Flat':P({1:.03,2:0,4:.03,5:0,7:.02,10:.02,12:-.65,14:-.3,16:-1.57,18:.3}),
+ 'Wall Flat':P({1:.03,2:0,4:.03,5:0,7:.02,8:0,10:.02,11:0,18:.22}),
  'Kneel':P({6:0,8:1.57,9:0,11:1.57,12:-.31,18:.85}),
  'T-Pose':P({1:1.57,4:1.57,7:.08,10:.08,18:.6}),
  'Wave':P({4:2.5,5:.4,15:.2}),
@@ -429,9 +383,7 @@ function capture(cam){const s=renderer.getSize(new THREE.Vector2());
  renderer.readRenderTargetPixels(rt,0,0,s.x,s.y,px);}
 const pxAt=(x,y)=>((rt.height-1-Math.min(rt.height-1,Math.max(0,y|0)))*rt.width+Math.min(rt.width-1,Math.max(0,x|0)))*4;
 function pick(cx,cy){const h=cast(paintMeshes,cx,cy);let hex;
- if(h){const px2=Math.min(ATLAS_W-1,Math.max(0,Math.round(h.uv.x*ATLAS_W))),py2=Math.min(ATLAS_H-1,Math.max(0,Math.round(h.uv.y*ATLAS_H)));
-  hex=hexOf(paintCtx.getImageData(px2,py2,1,1).data,0);}
- else{capture(camera);hex=hexOf(px,pxAt(cx,cy));}
+ if(h)hex=volHex(bindAt(h));else{capture(camera);hex=hexOf(px,pxAt(cx,cy));}
  setColor(hex);toast('Picked '+hex.toUpperCase());}
 function camoPass(cam,minDot){
  cham.updateMatrixWorld(true);cam.updateMatrixWorld(true);
@@ -442,7 +394,7 @@ function camoPass(cam,minDot){
  const step=Math.max(2,Math.ceil(Math.sqrt((X1-X0)*(Y1-Y0)/20000)));let n=0;
  for(let y=Y0;y<Y1;y+=step)for(let x=X0;x<X1;x+=step){const hit=cast(paintMeshes,x,y,cam);if(!hit)continue;
   if(hit.face.normal.clone().transformDirection(hit.object.matrixWorld).dot(rc.ray.direction)>-minDot)continue;
-  const i=pxAt(x,y);strokeAt(hit.uv.x,hit.uv.y,.05,'brush',hexOf(px,i));n++;}
+  const i=pxAt(x,y);paint3D(bindAt(hit),step*hit.distance*2*Math.tan(cam.fov*Math.PI/360)/innerHeight*.9,'fill',[px[i],px[i+1],px[i+2]]);n++;}
  return n;}
 function autoCamo(){snap();toast(camoPass(camera,.3)?'Camo matched - rotate and press C for other sides, or Shift+C for all':'Stand in front of a surface first');}
 function camoAround(){snap();const c=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,.1,150),p=cham.position;
@@ -473,7 +425,7 @@ cvEl.addEventListener('pointerdown',e=>{
  cvEl.setPointerCapture(e.pointerId);mx=lx=e.clientX;my=ly=e.clientY;
  if(!paintMode||e.button!==0){orbit=true;cvEl.style.cursor='grabbing';return;}
  if(tool==='pick'||e.altKey){pick(e.clientX,e.clientY);if(tool==='pick')setTool('brush');return;}
- if(tool==='bucket'){const h=cast(paintMeshes,e.clientX,e.clientY);if(h){snap();strokeAt(h.uv.x,h.uv.y,.14,'brush',color);}return;}
+ if(tool==='bucket'){const h=cast(paintMeshes,e.clientX,e.clientY);if(h){snap();paint3D(bindAt(h),.32,'brush');}return;}
  snap();painting=true;});
 addEventListener('pointermove',e=>{mx=e.clientX;my=e.clientY;if(wOpen)hoverWheel();
  if(hunterLooking()){if(mouseLockUnavailable&&document.pointerLockElement!==cvEl&&e.target===cvEl)hunterMouseLook(e.movementX,e.movementY);return;}
@@ -626,10 +578,9 @@ renderer.setAnimationLoop(()=>{
  body.position.y=STAND+cur[12];body.rotation.set(cur[16],0,cur[17]);flat.scale.set(cur[19],1,cur[18]);torsoP.rotation.x=cur[13];headP.rotation.set(cur[14],cur[15],0);
  if(wOpen)wheel.querySelectorAll('.wi').forEach((d,i)=>d.classList.toggle('cur',PAGES[wPage][i]===pose));
  if(paintMode&&painting&&(tool==='brush'||tool==='erase'||tool==='shade')){const dx=mx-lx,dy=my-ly,steps=Math.max(1,Math.ceil(Math.hypot(dx,dy)/3));
-  for(let i=1;i<=steps;i++){const h=cast(paintMeshes,lx+dx*i/steps,ly+dy*i/steps);if(h)strokeAt(h.uv.x,h.uv.y,brushRNorm(),tool,tool==='erase'?BASE:color);}lx=mx;ly=my;}
- if(paintDirty){paintTex.needsUpdate=true;paintDirty=false;}
- remotePlayers.forEach(r=>{const g=r.group,k=1-Math.exp(-10*dt);g.position.x+=(r.tx-g.position.x)*k;g.position.y+=(r.ty-g.position.y)*k;g.position.z+=(r.tz-g.position.z)*k;g.rotation.y+=wrap(r.try_-g.rotation.y)*k;
-  const tgt=POSES[r.pose]||POSES.Stand,pk=1-Math.exp(-14*dt);for(let i=0;i<NP;i++)r.cur[i]+=(tgt[i]-r.cur[i])*pk;poseRig(r.rig,r.cur);});
+  for(let i=1;i<=steps;i++){const h=cast(paintMeshes,lx+dx*i/steps,ly+dy*i/steps);if(h)paint3D(bindAt(h),size,tool);}lx=mx;ly=my;}
+ if(volDirty){volTex.needsUpdate=true;volDirty=false;}
+ remotePlayers.forEach(r=>{const g=r.group,k=1-Math.exp(-10*dt);g.position.x+=(r.tx-g.position.x)*k;g.position.y+=(r.ty-g.position.y)*k;g.position.z+=(r.tz-g.position.z)*k;g.rotation.y+=wrap(r.try_-g.rotation.y)*k;});
  yaw+=(yawT-yaw)*(1-Math.exp(-28*dt));pitch+=(pitchT-pitch)*(1-Math.exp(-28*dt));
  camT.lerp(new THREE.Vector3(p.x,1.15+p.y*.6,p.z),1-Math.exp(-22*dt));cd+=(dist-cd)*(1-Math.exp(-8*dt));
  const off=new THREE.Vector3(Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch)).normalize();
@@ -644,34 +595,17 @@ const $$=id=>document.getElementById(id);
 const net={ws:null,myName:'',roomId:'',role:null,active:false,ended:false,phase:'lobby',players:new Set()};
 let frozen=false,mpMoveTimer=null,mpCountdown=null;
 const remotePlayers=new Map(),remoteGroup=new THREE.Group();scene.add(remoteGroup);
-// Every remote player gets their OWN paint canvas/texture (populated from network stroke and
-// snapshot data), using the exact same UV-atlas layout as the local player - only the pixels differ.
-function buildRig(){
- const{canvas,ctx,tex}=makePaintCanvas(),mat=new THREE.MeshBasicMaterial({map:tex,fog:false});
- const group=new THREE.Group(),built=buildBlobBody(mat,group,null);
- return{group,body:built.body,flat:built.flat,torsoP:built.torsoP,headP:built.headP,arms:built.arms,legsL:built.legsL,mat,paintCanvas:canvas,paintCtx:ctx,paintTex:tex};
-}
-function poseRig(r,cur){r.arms[0].top.rotation.set(cur[0],0,-cur[1]);r.arms[0].mid.rotation.x=-cur[2];
- r.arms[1].top.rotation.set(cur[3],0,cur[4]);r.arms[1].mid.rotation.x=-cur[5];
- r.legsL[0].top.rotation.set(cur[6],0,-cur[7]);r.legsL[0].mid.rotation.x=cur[8];
- r.legsL[1].top.rotation.set(cur[9],0,cur[10]);r.legsL[1].mid.rotation.x=cur[11];
- r.body.position.y=.73+cur[12];r.body.rotation.set(cur[16],0,cur[17]);r.flat.scale.set(cur[19],1,cur[18]);
- r.torsoP.rotation.x=cur[13];r.headP.rotation.set(cur[14],cur[15],0);}
-function ensureRemote(name){let r=remotePlayers.get(name);if(!r){const rig=buildRig();
- rig.group.traverse(o=>{if(o.isMesh)o.userData.ownerName=name;});remoteGroup.add(rig.group);
- r={rig,group:rig.group,tx:0,ty:0,tz:0,try_:0,pose:'Stand',cur:I.slice(),caught:false};remotePlayers.set(name,r);}return r;}
-function dropRemote(name){const r=remotePlayers.get(name);if(r){remoteGroup.remove(r.group);remotePlayers.delete(name);}}
+function remoteAvatar(){const g=new THREE.Group(),m=new THREE.MeshBasicMaterial({color:0xffffff});
+ const b=new THREE.Mesh(new THREE.CapsuleGeometry(.28,.55,6,12),m);b.position.y=.73;g.add(b);
+ const h=new THREE.Mesh(new THREE.SphereGeometry(.28,16,12),m);h.position.y=1.35;g.add(h);g.userData.mat=m;return g;}
+function ensureRemote(name){let r=remotePlayers.get(name);if(!r){const group=remoteAvatar();remoteGroup.add(group);r={group,tx:0,ty:0,tz:0,try_:0,caught:false};remotePlayers.set(name,r);}return r;}
 function removeAllRemotes(){remotePlayers.forEach(r=>remoteGroup.remove(r.group));remotePlayers.clear();}
-function mpDot(c){$$('mpdot').style.background=c;}
 function mpStatus(s){$$('mpstatus').textContent=s;}
-function mpAddPlayer(n){if(net.players.has(n))return;net.players.add(n);const d=document.createElement('div');d.id='mpp-'+n;d.textContent=n===net.myName?n+' (you)':n;$$('mplist').appendChild(d);}
-function mpDropPlayer(n){net.players.delete(n);const d=document.getElementById('mpp-'+n);if(d)d.remove();}
+function mpAddPlayer(n){if(net.players.has(n))return;net.players.add(n);const d=document.createElement('div');d.textContent=n===net.myName?n+' (you)':n;$$('mplist').appendChild(d);}
 function mpSend(type,data){if(net.ws&&net.ws.readyState===1)net.ws.send(JSON.stringify({type,data}));}
-function mpRequestState(){mpSend('request-state',{roomId:net.roomId});}
 
 $$('btnmp').onclick=()=>{overlay.classList.add('hidden');$$('mp').classList.remove('hidden');};
 $$('mpback').onclick=()=>{$$('mp').classList.add('hidden');overlay.classList.remove('hidden');};
-$$('mpleave').onclick=()=>{mpSend('leave-room',{roomId:net.roomId,userName:net.myName});setTimeout(()=>location.reload(),150);};
 $$('mpconnect').onclick=()=>{
  const url=$$('mpurl').value.trim(),name=$$('mpname').value.trim(),room=$$('mproom').value.trim();
  if(!name||!room){mpStatus('Enter a name and a room ID.');return;}
@@ -686,16 +620,13 @@ $$('mpconnect').onclick=()=>{
 };
 function mpHandle(m){
  const text=typeof m==='string'?m:m.message;
- if(text==='connected'){mpDot('#2ecc71');return;}
+ if(text==='connected')return;
  if(text==='user setup is complete'){mpSend('join-room',{roomId:net.roomId,userName:net.myName});return;}
- if(text==='user setup complete'){mpStatus('That name is taken on this server - pick another and reconnect.');mpDot('#e74c3c');return;}
+ if(text==='user setup complete'){mpStatus('That name is taken on this server - pick another and reconnect.');return;}
  if(text==='roomId not found'){mpStatus('Enter a room ID first.');return;}
  if(text==='succesfully joined the room'){if(Array.isArray(m.payload))m.payload.forEach(mpAddPlayer);mpStatus('Joined room "'+net.roomId+'" - waiting for players...');mpAddPlayer(net.myName);$$('mpstart').style.display='block';return;}
  if(text==='only host can perform this action'){toast('Only the host can start the game.');return;}
- if(m&&m.event==='error'){toast(m.message||'Server error');return;}
  if(m&&m.message==='a user joined'){mpAddPlayer(m.payload);return;}
- if(m&&(m.event==='user left'||m.event==='player-left')){mpDropPlayer(m.userName);dropRemote(m.userName);toast(m.userName+' left');return;}
- if(m&&(m.event==='room ended as the last hider left'||m.event==='room ended as the hunter left')){mpEnd(null,m.event==='room ended as the hunter left'?'HIDERS WIN - hunter left':'ROUND ENDED - last hider left');return;}
  if(m&&m.event==='player limit'){toast('Need at least 3 players to start.');return;}
  if(m&&m.event==='game-started'){mpStartGame(m.role);return;}
  if(m&&m.message==='a player moved'){mpMove(m.payload);return;}
@@ -716,10 +647,7 @@ function mpStartGame(role){releaseMouse();mouseLockUnavailable=false;
  mpCountdown=setInterval(()=>{left--;if(left<=0){label('WAITING FOR SEEK');clearInterval(mpCountdown);}else label('HIDE '+left+'s');},1000);
  clearInterval(mpMoveTimer);
  mpMoveTimer=setInterval(()=>{if(!net.active)return;
-  const coords={x:cham.position.x,y:cham.position.y,z:cham.position.z,ry:cham.rotation.y,pose,userName:net.myName},now=performance.now();
-  if(pendingStrokes.length)coords.strokes=pendingStrokes.splice(0,40);              // tiny per-stroke commands: pixel-identical replay on every client
-  if(forceFullSync||now-lastFullSync>1000){coords.img=fullSyncDataURL();lastFullSync=now;forceFullSync=false;}   // compressed backstop for whole-canvas ops + late joiners
-  mpSend('movement',{roomId:net.roomId,userName:net.myName,coordinates:coords});},100);
+  mpSend('movement',{roomId:net.roomId,coordinates:{x:cham.position.x,y:cham.position.y,z:cham.position.z,ry:cham.rotation.y,pose,col:color,userName:net.myName}});},100);
 }
 function mpMove(c){if(!c||c.userName===net.myName)return;const r=ensureRemote(c.userName);if(r.caught)return;
  r.tx=c.x;r.ty=c.y;r.tz=c.z;r.try_=c.ry||0;if(c.col)r.group.userData.mat.color.set(c.col);}
